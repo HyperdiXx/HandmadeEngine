@@ -1,0 +1,25 @@
+handmade.cpp
+Microsoft (R) Incremental Linker Version 14.16.27025.1
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:handmade.dll 
+/debug 
+/map:handmade.map 
+/dll 
+/implib:handmade.lib 
+/DLL 
+/EXPORT:GameGetSoundSamples 
+/EXPORT:GameUpdateAndRender 
+handmade.obj 
+win32_startfile.cpp
+Microsoft (R) Incremental Linker Version 14.16.27025.1
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+/out:win32_startfile.exe 
+/debug 
+-incremental:no 
+-opt:ref 
+user32.lib 
+gdi32.lib 
+winmm.lib 
+win32_startfile.obj 
