@@ -191,7 +191,11 @@ struct game_state
     int BlueOffset;
     int ToneHz;
     real32 tSine;
+    int PlayerX, PlayerY;
+    real32 tJmp;
 };
+
+
 
 
 #define HANDMADE_H
