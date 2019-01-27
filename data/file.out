@@ -74,12 +74,11 @@ internal void RenderGradient(game_offscreen_buffer *Buffer, int XOffset, int YOf
 }
 
 internal void
-RenderPlayer(game_offscreen_buffer* Buffer, int PlayerX, int PlayerY)
+RenderPlayer(game_offscreen_buffer* Buffer, int PlayerX, int PlayerY, uint32 Color)
 {
     uint8 *EndofBuffer = (uint8 *)Buffer->BitmapMemory + 
         Buffer->Pitch *
         Buffer->Height;
-    uint32 Color = 0xFFFFFFFF;
     int Top = PlayerY;
     int Bottom = PlayerY + 10;
 
@@ -120,12 +119,12 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 	{
 		char *Filename = __FILE__;
 
-		debug_read_file_res File = Memory->DEBUGPlatrformReadEntireFile(Filename);
+		debug_read_file_res File = Memory->DEBUGPlatrformReadEntireFile(Thread, Filename);
 
 		if (File.Contents)
 		{
-			Memory->DEBUGPlatformWriteEntireFile("V:/handmade/data/file.out", File.ContentsSize, File.Contents);
-			Memory->DEBUGPlatformFreeFileMemory(File.Contents);
+			Memory->DEBUGPlatformWriteEntireFile(Thread, "V:/handmade/data/file.out", File.ContentsSize, File.Contents);
+			Memory->DEBUGPlatformFreeFileMemory(Thread, File.Contents);
 		}
 
 
@@ -160,8 +159,8 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
 		}
 		
-        GameState->PlayerX += (int)(4.0f * (Controllers->StickAverageX));
-        GameState->PlayerY -= (int)(4.0f * (Controllers->StickAverageY));
+        GameState->PlayerX += (int)(8.0f * (Controllers->StickAverageX));
+        GameState->PlayerY -= (int)(8.0f * (Controllers->StickAverageY));
         if (GameState->tJmp > 0)
         {
             GameState->PlayerY += (int)(10.0f * sinf(0.5f * Pi32 * GameState->tJmp));
@@ -175,7 +174,15 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 	}
 
     RenderGradient(Buffer, GameState->BlueOffset, GameState->GreenOffset);
-    RenderPlayer(Buffer, GameState->PlayerX, GameState->PlayerY);
+    RenderPlayer(Buffer, GameState->PlayerX, GameState->PlayerY, 0xFFFFFFFF);
+
+    RenderPlayer(Buffer, Input->MouseX, Input->MouseY, 0xFFFFFFFF);
+
+    if (Input->Mouse[0].IsEnd)
+    {
+        RenderPlayer(Buffer, 20, 20, 0xFFFF0000);
+
+    }
 }
 
 
