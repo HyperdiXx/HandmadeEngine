@@ -181,7 +181,6 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     if (Input->Mouse[0].IsEnd)
     {
         RenderPlayer(Buffer, 20, 20, 0xFFFF0000);
-
     }
 }
 
