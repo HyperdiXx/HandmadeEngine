@@ -944,10 +944,16 @@ Win32GetFileEXE(win32_state *Win32State)
 
 
 int CALLBACK WinMain(HINSTANCE hInstance,
-	HINSTANCE hPrev,
-	LPSTR lpCmdLine,
-	int ncmdShow)
+    HINSTANCE hPrev,
+    LPSTR lpCmdLine,
+    int ncmdShow)
 {
+#if OPENGL_RENDER
+    for (int i = 0; i < 10; ++i)
+    {
+        OutputDebugStringA("OPENGL RENDER\n");
+    }   
+#endif
     win32_state Win32State = {};
 
     Win32GetFileEXE(&Win32State);

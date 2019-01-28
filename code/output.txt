@@ -9,7 +9,7 @@ Copyright (C) Microsoft Corporation.  All rights reserved.
 /implib:handmade.lib 
 -incremental:no 
 -opt:ref 
--PDB:handmade_26918.pdb 
+-PDB:handmade_698.pdb 
 /DLL 
 -EXPORT:GameGetSoundSamples 
 -EXPORT:GameUpdateAndRender 
