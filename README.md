@@ -10,4 +10,4 @@ Engine part:
 Rendering part:
 - OpenGl render
 - D3D11 render
-- Software based render
+- Software-based render
