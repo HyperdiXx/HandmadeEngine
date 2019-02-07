@@ -1,0 +1,26 @@
+ //GameState->PlayerX += (int)(playerAddX);
+//GameState->PlayerY -= (int)(playerAddY);
+            
+/*if (Controllers->MoveLeft.IsEnd)
+{
+	GameState->BlueOffset -= 1;
+}
+if (Controllers->MoveRight.IsEnd)
+{
+	GameState->BlueOffset += 1;
+}*/
+
+//JoustickController
+
+ //GameState->PlayerX += (int)(8.0f * (Controllers->StickAverageX));
+        //GameState->PlayerY -= (int)(8.0f * (Controllers->StickAverageY));
+        /*if (GameState->tJmp > 0)
+        {
+            GameState->PlayerY += (int)(10.0f * sinf(0.5f * Pi32 * GameState->tJmp));
+        }
+        if (Controllers->ActionDown.IsEnd)
+        {
+            GameState->tJmp = 4.0;
+        }
+
+        GameState->tJmp -= 0.033f;*/

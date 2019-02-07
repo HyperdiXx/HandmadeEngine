@@ -153,6 +153,9 @@ struct game_input
     game_button_state Mouse[5];
     int MouseX, MouseY;
     uint32 MouseButtons;
+
+    real32 TimeElapsed;
+
 	game_controller_input Controlls[5];
 };
 
@@ -188,6 +191,26 @@ typedef GAME_UPDATE_AND_RENDER(game_update_and_render);
 #define GAME_GET_SOUND_SAMPLES(name) void name(thread_context *Thread, game_memory *Memory, game_sound_output_buffer *SoundBuffer)
 typedef GAME_GET_SOUND_SAMPLES(game_get_sound_samples);
 
+struct tile_map
+{
+    int32 TileMapCountX;
+    int32 TileMapCountY;
+
+    real32 UpperLeftX;
+    real32 UpperLeftY;
+
+    real32 TileHeight;
+    real32 TileWidth;
+    uint32 *Map;
+};
+
+struct world
+{
+    int32 CountX;
+    int32 CountY;
+
+    tile_map *TileMaps;
+};
 
 struct game_state
 {
@@ -195,8 +218,9 @@ struct game_state
     int BlueOffset;
     int ToneHz;
     real32 tSine;
-    int PlayerX, PlayerY;
+    int32 PlayerX, PlayerY;
     real32 tJmp;
+    real32 vel;
 };
 
 

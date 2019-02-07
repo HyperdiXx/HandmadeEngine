@@ -106,6 +106,62 @@ RenderPlayer(game_offscreen_buffer* Buffer, int PlayerX, int PlayerY, uint32 Col
 
 }
 
+internal int32
+RoundValue(real32 Val)
+{
+    int32 Res = (int32)(Val + 0.5f);
+
+    return (Res);
+}
+
+internal void
+RenderRectangle(game_offscreen_buffer* Buffer, real32 MinXIn, real32 MinYIn, real32 MaxXIn, real32 MaxYIn)
+{
+    int32 MinY = RoundValue(MinYIn);
+    int32 MaxY = RoundValue(MaxYIn);
+    int32 MinX = RoundValue(MinXIn);
+    int32 MaxX = RoundValue(MaxXIn);
+
+    if (MinY < 0)
+    {
+        MinY = 0;
+    }
+    if (MinX < 0)
+    {
+        MinX = 0;
+    }
+    if (MaxX > Buffer->Width)
+    {
+        MinX = Buffer->Width;
+    }
+    if (MaxY > Buffer->Height)
+    {
+        MinY = Buffer->Height;
+    }
+
+    uint32 Color = 0xFFFFFFFF;
+
+    uint8 *Row = ((uint8 *)Buffer->BitmapMemory + MinX * Buffer->BytesPerPixel + MinY * Buffer->Pitch);
+
+    // : Cache friendly
+
+    for (int y = MinY;
+        y < MaxY;
+        ++y)
+    {
+        uint32 *Pixel = (uint32 *)Row;
+        for (int x = MinX;
+            x < MaxX;
+            ++x)
+        {
+            *Pixel++ = Color;
+        }
+        Row += Buffer->Pitch;
+    }
+    
+}
+
+
 
 extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 {
@@ -143,23 +199,23 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 		game_controller_input *Controllers = GetController(Input, ControllerIndex);
 		if (Controllers->IsAnalog)
 		{
-			GameState->ToneHz = 512 + (int)(128.0f * (Controllers->StickAverageY));
-			GameState->BlueOffset += (int)(4.0f * (Controllers->StickAverageX));
+			//GameState->ToneHz = 512 + (int)(128.0f * (Controllers->StickAverageY));
+			//GameState->BlueOffset += (int)(4.0f * (Controllers->StickAverageX));
 		}
 		else
 		{
-			if (Controllers->MoveLeft.IsEnd)
+			/*if (Controllers->MoveLeft.IsEnd)
 			{
 				GameState->BlueOffset -= 1;
 			}
 			if (Controllers->MoveRight.IsEnd)
 			{
 				GameState->BlueOffset += 1;
-			}
+			}*/
 
 		}
 		
-        GameState->PlayerX += (int)(8.0f * (Controllers->StickAverageX));
+        /*GameState->PlayerX += (int)(8.0f * (Controllers->StickAverageX));
         GameState->PlayerY -= (int)(8.0f * (Controllers->StickAverageY));
         if (GameState->tJmp > 0)
         {
@@ -170,18 +226,21 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             GameState->tJmp = 4.0;
         }
 
-        GameState->tJmp -= 0.033f;
+        GameState->tJmp -= 0.033f;*/
 	}
 
-    RenderGradient(Buffer, GameState->BlueOffset, GameState->GreenOffset);
-    RenderPlayer(Buffer, GameState->PlayerX, GameState->PlayerY, 0xFFFFFFFF);
+    //RenderGradient(Buffer, GameState->BlueOffset, GameState->GreenOffset);
+    //RenderPlayer(Buffer, GameState->PlayerX, GameState->PlayerY, 0xFFFFFFFF);
 
-    RenderPlayer(Buffer, Input->MouseX, Input->MouseY, 0xFFFFFFFF);
+    //RenderPlayer(Buffer, Input->MouseX, Input->MouseY, 0xFFFFFFFF);
 
-    if (Input->Mouse[0].IsEnd)
+    /*if (Input->Mouse[0].IsEnd)
     {
         RenderPlayer(Buffer, 20, 20, 0xFFFF0000);
-    }
+    }*/
+
+    RenderRectangle(Buffer, 10.0f, 10.0f, 30.0f, 30.0f);
+
 }
 
 

@@ -9,6 +9,7 @@
 
 #include "win32_handmade.h"
 
+
 #define X_INPUT_GET_STATE(name) DWORD WINAPI name(DWORD dwUserIndex, XINPUT_STATE *pState)
 #define X_INPUT_SET_STATE(name) DWORD WINAPI name(DWORD dwUserIndex, XINPUT_STATE *pDoubleState)
 typedef X_INPUT_GET_STATE(x_input_get_state);
@@ -590,12 +591,24 @@ Win32UpdateWindow(win32_offscreen_buffer *Buffer, HDC DeviceContext, int W, int 
 {
     //while writiong rendering im locking the rendering window to 1 by pixel
 
+    //PatBlt(DeviceContext, 0, 0, W, H, BLACKNESS);
+
+    int OffsetX = 10;
+    int OffsetY = 10;
+
+
+    PatBlt(DeviceContext, 0, 0, W, OffsetY, BLACKNESS);
+    PatBlt(DeviceContext, 0, OffsetY + Buffer->BitmapHeight, W, H, BLACKNESS);
+    PatBlt(DeviceContext, 0, 0, OffsetX, H, BLACKNESS);
+    PatBlt(DeviceContext, OffsetX + Buffer->BitmapWidth, 0, W, H, BLACKNESS);
+
+
 	StretchDIBits(
 			DeviceContext, 
 			/*X, Y, Width, Height,
 			X, Y, Width, Height,
                     W, H*/
-			0, 0, W, H,
+			OffsetX, OffsetY, W, H,
 			0, 0, Buffer->BitmapWidth, Buffer->BitmapHeight,
 			Buffer->BitmapMemory, &Buffer->BitmapInfo,
 			DIB_RGB_COLORS, SRCCOPY);
@@ -940,20 +953,38 @@ Win32GetFileEXE(win32_state *Win32State)
 }
 
 
-
-
-
 int CALLBACK WinMain(HINSTANCE hInstance,
     HINSTANCE hPrev,
     LPSTR lpCmdLine,
     int ncmdShow)
 {
 #if OPENGL_RENDER
-    for (int i = 0; i < 10; ++i)
-    {
-        OutputDebugStringA("OPENGL RENDER\n");
-    }   
+    
+    STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi, sizeof(pi));
+
+    bool st = CreateProcess(TEXT("E:\\OpenglT\\Opengl\\Debug\\XEngine.exe"),
+        NULL,        // Command line
+        NULL,           // Process handle not inheritable
+        NULL,           // Thread handle not inheritable
+        FALSE,          // Set handle inheritance to FALSE
+        0,              // No creation flags
+        NULL,           // Use parent's environment block
+        NULL,           // Use parent's starting directory 
+        &si,            // Pointer to STARTUPINFO structure
+        &pi);           // Pointer to PROCESS_INFORMATION structure
+        
+    WaitForSingleObject(pi.hProcess, INFINITE);
+
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+
 #endif
+
     win32_state Win32State = {};
 
     Win32GetFileEXE(&Win32State);
@@ -1033,8 +1064,6 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 			Win32ClearBufferSound(&SoundOutput);
 			GlobalSecondBuffer->Play(0, 0, DSBPLAY_LOOPING);
 
-           
-
 			Running = true;
 
 			int16 *Samples = (int16 *)VirtualAlloc(0, SoundOutput.SecondaryBufferSize, MEM_RESERVE | MEM_COMMIT, PAGE_READWRITE);
@@ -1090,11 +1119,11 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 
 			if (Samples && GameMemory.PermanentStorage && GameMemory.TransientStorage)
 			{
-
-
 				game_input Input[2] = {};
 				game_input *NewInput = &Input[0];
 				game_input *OldInput = &Input[1];
+
+           
 
 				LARGE_INTEGER LastCounter = Win32GetWallClock();
 				LARGE_INTEGER FlipWallClock = Win32GetWallClock();
@@ -1115,6 +1144,8 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 				
                 while (Running)
                 {
+                    NewInput->TimeElapsed = TargetSecondsElapsedPerFrame;
+
                     FILETIME NewDLLWriteTime = Win32GetLastTimeWrite(SourceDLLName);
                     if (CompareFileTime(&NewDLLWriteTime, &GameCode.DLLLastWriteFile) != 0)
                     {
@@ -1358,7 +1389,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
                             {
                                 GameCode.GameGetSoundSamples(&Thread, &GameMemory, &SoundBuffer);
                             }
-                            
+     
 #if HANDMADE_INTERNAL
 
                             win32_debug_time_marker *Marker = &DebugTimeMarkers[DebugTimeMarkerIndex];
