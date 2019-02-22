@@ -6,8 +6,10 @@ Engine part:
 - Input(all types)
 - Sound wave
 - Hotload
+- Image rendering
 
 Rendering part:
-- OpenGl render
-- D3D11 render
+- OpenGL API
+- DX11 API
+- DX12 API
 - Software-based render
