@@ -121,6 +121,7 @@ DEBUG_PLATFORM_WRITE_ENTIRE_FILE(DEBUGPlatformWriteEntireFile)
 	{
 
 	}
+
 	return(Result);
 }
 
@@ -471,9 +472,9 @@ Win32BuildPathFIlename(win32_state * Win32State, char *Filename, int DestCount, 
 internal void
 Win32GetInputFileLocation(win32_state *Win32State, int SlotIndex, int DestCount, char *Dest)
 {
-    char T[64];
+    /*char T[64];
     wsprintf(T, "loop_edit_%d.vform", SlotIndex);
-    Win32BuildPathFIlename(Win32State, T, DestCount, Dest);
+    Win32BuildPathFIlename(Win32State, T, DestCount, Dest);*/
 }
 
 internal win32_replay_buffer*
@@ -590,9 +591,6 @@ internal void
 Win32UpdateWindow(win32_offscreen_buffer *Buffer, HDC DeviceContext, int W, int H)
 {
     //while writiong rendering im locking the rendering window to 1 by pixel
-
-    //PatBlt(DeviceContext, 0, 0, W, H, BLACKNESS);
-
     int OffsetX = 10;
     int OffsetY = 10;
 
@@ -967,7 +965,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
     si.cb = sizeof(si);
     ZeroMemory(&pi, sizeof(pi));
 
-    bool st = CreateProcess(TEXT("E:\\OpenglT\\Opengl\\Debug\\XEngine.exe"),
+    bool st = CreateProcess(TEXT("E:\\OpenglT\\Opengl\\x64\\Debug\\XEngine.exe"),
         NULL,        // Command line
         NULL,           // Process handle not inheritable
         NULL,           // Thread handle not inheritable
@@ -1026,7 +1024,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 			CreateWindowEx(
 				0,
 				WindowClass.lpszClassName,
-				"Hero",
+				"XEngine",
 				WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 				CW_USEDEFAULT,
 				CW_USEDEFAULT,
@@ -1055,7 +1053,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 
 			win32_sound_output SoundOutput = {};
 			SoundOutput.SamplesPerSecond = 48000;
-			//SoundOutput.WavePeriod = SoundOutput.SamplesPerSecond / 256;
+            SoundOutput.WavePeriod = SoundOutput.SamplesPerSecond / 256;
 			SoundOutput.BytesPerSample = sizeof(int16) * 2;
 			SoundOutput.SecondaryBufferSize = SoundOutput.SamplesPerSecond * SoundOutput.BytesPerSample;
             SoundOutput.SafetyBytes = (int)(((real32)SoundOutput.SamplesPerSecond * (real32)SoundOutput.BytesPerSample / GameUpdateHz) / 3.0f);

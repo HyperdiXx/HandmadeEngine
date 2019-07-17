@@ -25,7 +25,7 @@ GameShutdown(game_state *GameState)
 internal void
 GameOutputSound(game_state* GameState, game_sound_output_buffer *SoundBuffer, int ToneHz)
 {
-#if 0
+#if 0 
 	int16 ToneVolume = 3000;
 	int WavePeriod = SoundBuffer->SamplesPerSecond / ToneHz;
 
@@ -106,6 +106,8 @@ RenderPlayer(game_offscreen_buffer* Buffer, int PlayerX, int PlayerY, uint32 Col
 
 }
 
+#include <math.h>
+
 inline int32
 RoundValue(real32 Val)
 {
@@ -114,12 +116,26 @@ RoundValue(real32 Val)
     return (Res);
 }
 
+#include "math.h"
+inline int32
+FloorValue(real32 val)
+{
+    int32 res = (int32)floorf(val);
+    return (res);
+}
 
 inline int32
 TruncateValue(real32 Val)
 {
     int32 Res = (int32)(Val);
 
+    return (Res);
+}
+
+inline int32
+FloorReal32toInt32(real32 Real)
+{
+    int32 Res = (int32)floorf(Real);
     return (Res);
 }
 
@@ -186,50 +202,103 @@ GetTileMap(world *World, int32 TileX, int32 TileY)
 }
 
 inline uint32
-GetTileValue(tile_map *TileMap, int32 TileX, int32 TileY)
+GetTileValue(world *World, tile_map *TileMap, int32 TileX, int32 TileY)
 {
-    uint32 TileMapVal = TileMap->Map[TileY * TileMap->TileMapCountX + TileX];
+    Assert(TileMap);
+    Assert((TileX >= 0) && (TileX < World->CountX) && (TileY >= 0) && (TileY < World->CountY));
+
+    uint32 TileMapVal = TileMap->Map[TileY * World->CountX + TileX];
     return(TileMapVal);
 }
 
 internal bool32
-IsTileMapPointEmpty(tile_map *tm, real32 TestX, real32 TestY)
+IsTileMapPointEmpty(world *World, tile_map *TileMap, real32 TestX, real32 TestY)
 {
     bool32 Empty = false;
-
-    int32 PlayerTileX = TruncateValue((TestX - tm->UpperLeftX) / tm->TileWidth);
-    int32 PlayerTileY = TruncateValue((TestY - tm->UpperLeftY) / tm->TileHeight);
-
-    if ((PlayerTileX >= 0) && (PlayerTileX < tm->TileMapCountX) && (PlayerTileY >= 0) && (PlayerTileY < tm->TileMapCountY))
-    {
-        uint32 TileMapValue = GetTileValue(tm, PlayerTileX, PlayerTileY);
-        Empty = (TileMapValue == 0);
-    }
-    return (Empty);
-}
-
-internal bool32
-IsWorldPointEmpty(world *World, int32 TileMapX, int32 TileMapY, real32 TestX, real32 TestY)
-{
-    bool32 Empty = false;
-
-    tile_map *TileMap = GetTileMap(World, TileMapX, TileMapY);
 
     if (TileMap)
     {
-        int32 PlayerTileX = TruncateValue((TestX - TileMap->UpperLeftX) / TileMap->TileWidth);
-        int32 PlayerTileY = TruncateValue((TestY - TileMap->UpperLeftY) / TileMap->TileHeight);
+        int32 PlayerTileX = TruncateValue((TestX - World->UpperLeftX) / World->TileWidth);
+        int32 PlayerTileY = TruncateValue((TestY - World->UpperLeftY) / World->TileHeight);
 
-        if ((PlayerTileX >= 0) && (PlayerTileX < TileMap->TileMapCountX) && (PlayerTileY >= 0) && (PlayerTileY < TileMap->TileMapCountY))
+        if ((PlayerTileX >= 0) && (PlayerTileX < World->CountX) && (PlayerTileY >= 0) && (PlayerTileY < World->CountY))
         {
-            uint32 TileMapValue = GetTileValue(TileMap, PlayerTileX, PlayerTileY);
+            uint32 TileMapValue = GetTileValue(World, TileMap, PlayerTileX, PlayerTileY);
             Empty = (TileMapValue == 0);
         }
+
     }
 
-    
     return (Empty);
 }
+
+
+
+inline world_location
+GetCanonicalLocation(world *World, raw_position worldpos)
+{
+    world_location resPos;
+
+    resPos.TileMapX = worldpos.TileMapX;
+    resPos.TileMapY = worldpos.TileMapY;
+
+    real32 X = worldpos.X - World->UpperLeftX;
+    real32 Y = worldpos.Y - World->UpperLeftY;
+
+    resPos.TileX = TruncateValue(X / World->TileWidth);
+    resPos.TileY = TruncateValue(Y / World->TileHeight);
+
+    resPos.X = worldpos.X - resPos.TileX * World->TileWidth;
+    resPos.Y = worldpos.Y - resPos.TileY * World->TileHeight;
+
+    //Assert(resPos.X >= 0);
+    //Assert(resPos.Y >= 0);
+    //Assert(resPos.X < World->TileWidth);
+    //Assert(resPos.X < World->TileHeight);
+
+
+    if (resPos.TileX < 0)
+    {
+        resPos.TileX = World->CountX + resPos.TileX;
+        --resPos.TileMapX;
+    }
+
+    if (resPos.TileY < 0)
+    {
+        resPos.TileY = World->CountY + resPos.TileY;
+        --resPos.TileMapY;
+    }
+
+    if (resPos.TileX >= World->CountX)
+    {
+        resPos.TileX = resPos.TileX - World->CountX;
+        ++resPos.TileMapX;
+
+    }
+
+    if (resPos.TileY >= World->CountY)
+    {
+        resPos.TileY = resPos.TileX - World->CountX;
+        ++resPos.TileMapY;
+    }
+
+    return (resPos);
+}
+
+internal bool32
+IsWorldPointEmpty(world *World, raw_position Testpos)
+{
+    bool32 Empty = false;
+
+    world_location pos = GetCanonicalLocation(World, Testpos);
+
+    tile_map *TileMap = GetTileMap(World, pos.TileMapX, pos.TileMapY);
+    Empty = IsTileMapPointEmpty(World, TileMap, (real32)pos.TileX, (real32)pos.TileY);
+
+    return (Empty);
+}
+
+
 
 
 extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
@@ -295,48 +364,36 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         {1, 1, 1, 1,    1, 1, 1, 1,    1, 1, 1, 1,    1, 1, 1, 1},
     };
 
-
-
     tile_map TileMaps[2][2];
+ 
+   
+    world World = {};
 
-    TileMaps[0][0].TileMapCountX = TILEMAPCOUNTX;
-    TileMaps[0][0].TileMapCountY = TILEMAPCOUNTY;
-
-    TileMaps[0][0].UpperLeftX = -20;
-    TileMaps[0][0].UpperLeftY = -10;
-
-    TileMaps[0][0].TileWidth = 77;
-    TileMaps[0][0].TileHeight = 77;
-    
     TileMaps[0][0].Map = (uint32 *)Map1;
-
-    TileMaps[0][1] = TileMaps[0][0];
     TileMaps[0][1].Map = (uint32 *)Map2;
-
-    TileMaps[1][0] = TileMaps[0][0];
     TileMaps[1][0].Map = (uint32 *)Map3;
-
-
-    TileMaps[1][1] = TileMaps[0][0];
     TileMaps[1][1].Map = (uint32 *)Map4;
 
+    World.TileMapCountX = 2;
+    World.TileMapCountY = 2;
+    World.CountX = TILEMAPCOUNTX;
+    World.CountY = TILEMAPCOUNTY;
+    World.UpperLeftX = -20;
+    World.UpperLeftY = -10;
 
-    tile_map *TileMap = &TileMaps[0][0];
+    World.TileWidth = 77;
+    World.TileHeight = 77;
 
-    world World = {};
-     
-    World.CountX = 2;
-    World.CountY = 2;
+
+    real32 PlayerW = 0.2f * World.TileWidth;
+    real32 PlayerH = 0.3f * (real32)World.TileHeight;
+
 
     World.TileMaps = (tile_map*)TileMaps;
 
-    real32 PlayerW = 0.2f * TileMap->TileWidth;
-    real32 PlayerH =  0.3f * (real32)TileMap->TileHeight;
+    game_state *GameState = (game_state *)Memory->PermanentStorage;
     
 
-    game_state *GameState = (game_state *)Memory->PermanentStorage;
-
-  
     if (!Memory->IsInitialized)
     {
         GameState->PlayerX = 50;
@@ -345,6 +402,9 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         Memory->IsInitialized = true;
     }
 
+
+    tile_map *TileMap = GetTileMap(&World, GameState->PlayerTileMapX, GameState->PlayerTileMapY);
+    Assert(TileMap);
 
     for (int ControllerIndex = 0;
         ControllerIndex < ArrayCount(Input->Controlls);
@@ -397,11 +457,26 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             real32 NewPlayerX = GameState->PlayerX + GameState->vel * Input->TimeElapsed * (Controllers->StickAverageX);
             real32 NewPlayerY = GameState->PlayerY + GameState->vel * Input->TimeElapsed * (Controllers->StickAverageY);
 
-            if (IsTileMapPointEmpty(TileMap, NewPlayerX - 0.5f * PlayerW, NewPlayerY) && IsTileMapPointEmpty(TileMap, NewPlayerX + 0.5f * PlayerW, NewPlayerY)
-                && IsTileMapPointEmpty(TileMap, NewPlayerX, NewPlayerY))
+            raw_position PlayerPos = {
+            GameState->PlayerTileMapX, GameState->PlayerTileMapY, NewPlayerX, NewPlayerY };
+
+            raw_position PlayerLeft = PlayerPos;
+            PlayerLeft.X -= 0.5f * PlayerW;
+
+            raw_position PlayerRight = PlayerPos;
+            PlayerRight.X += 0.5f * PlayerW;
+
+            if (IsWorldPointEmpty(&World, PlayerPos) && IsWorldPointEmpty(&World, PlayerLeft)
+                && IsWorldPointEmpty(&World, PlayerRight))
             {
-                GameState->PlayerX = (int32)NewPlayerX;
-                GameState->PlayerY = (int32)NewPlayerY;
+
+                world_location pos = GetCanonicalLocation(&World, PlayerPos);
+
+                GameState->PlayerTileMapX = pos.TileMapX;
+                GameState->PlayerTileMapY = pos.TileMapY;
+
+                GameState->PlayerX = World.UpperLeftX + World.TileWidth * pos.TileX + (int32)pos.X;
+                GameState->PlayerY = World.UpperLeftY + World.TileHeight * pos.TileY + (int32)pos.Y;
                 IsMoved = true;
             }
             else
@@ -409,28 +484,18 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
             }
 
-        }
-        
-       
-       
+        }              
+ 
         if(Controllers->ActionDown.IsEnd)
         {
             real32 posX = (real32)GameState->PlayerX + 10.0f;
             real32 posY = (real32)GameState->PlayerY + 10.0f;
             RenderRectangle(Buffer, posX, posY, (real32)GameState->PlayerX + 20.0f, (real32)GameState->PlayerY + 20.0f, 1.0f, 1.0f, 1.0f);
             posX += (int)(Input->TimeElapsed * 64.0f);
-
         }
     }
 
-    //RenderGradient(Buffer, GameState->BlueOffset, GameState->GreenOffset);
-
-    //RenderPlayer(Buffer, Input->MouseX, Input->MouseY, 0xFFFFFFFF);
-
-
-
-    //RenderRectangle(Buffer, 0.0f, 0.0f, (real32)Buffer->Width, (real32)Buffer->Height, 0.0f, 0.0f, 0.2f);
-
+   
     for (int Row = 0;
         Row < 9;
         ++Row)
@@ -439,16 +504,16 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             Column < 16;
             ++Column)
         {
-            uint32 ID = GetTileValue(TileMap, Column, Row);
+            uint32 ID = GetTileValue(&World, TileMap, Column, Row);
             real32 Gray = 0.5f;
             if (ID == 1)
             {
                 Gray = 1.0f;
             }
-            real32 MinX = 10 + ((real32)Column) * TileMap->TileWidth;
-            real32 MinY = -10 + ((real32)Row) * TileMap->TileHeight;
-            real32 MaxX = MinX + TileMap->TileWidth;
-            real32 MaxY = MinY + TileMap->TileHeight;
+            real32 MinX = World.UpperLeftX + ((real32)Column) * World.TileWidth;
+            real32 MinY = World.UpperLeftY + ((real32)Row) * World.TileHeight;
+            real32 MaxX = MinX + World.TileWidth;
+            real32 MaxY = MinY + World.TileHeight;
             RenderRectangle(Buffer, MinX, MinY, MaxX, MaxY, Gray, Gray, Gray);
 
         }
