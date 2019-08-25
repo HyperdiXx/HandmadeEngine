@@ -83,33 +83,34 @@ struct tile_map
 
 struct world
 {
-    int32 UpperLeftX;
-    int32 UpperLeftY;
-
-    int32 TileWidth;
-    int32 TileHeight;
+    real32 TileSideInMetr;
+    int32 TileSideInPixels;
 
     int32 CountX;
     int32 CountY;
 
+    int32 UpperLeftX;
+    int32 UpperLeftY;
+
     int32 TileMapCountX;
     int32 TileMapCountY;
-
 
     tile_map *TileMaps;
 };
 
 struct game_state
 {
-    int32 PlayerTileMapX;
+    world_location playerPosition;
+    /*int32 PlayerTileMapX;
     int32 PlayerTileMapY;
+    int32 PlayerX, PlayerY;
+    real32 tJmp;
+    */
+    real32 vel;
     int GreenOffset;
     int BlueOffset;
     int ToneHz;
     real32 tSine;
-    int32 PlayerX, PlayerY;
-    real32 tJmp;
-    real32 vel;
 };
 
 
