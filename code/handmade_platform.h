@@ -140,9 +140,6 @@ extern "C" {
 #define GAME_UPDATE_AND_RENDER(name) void name(thread_context *Thread, game_memory *Memory, game_input *Input, game_offscreen_buffer *Buffer)
     typedef GAME_UPDATE_AND_RENDER(game_update_and_render);
 
-    //void GameUpdateAndRenderer(game_memory *Memory, game_input *Input, game_offscreen_buffer *Buffer);
-    //void GetSoundSamples(game_memory *Memory, game_sound_output_buffer *SoundBuffer);
-
 #define GAME_GET_SOUND_SAMPLES(name) void name(thread_context *Thread, game_memory *Memory, game_sound_output_buffer *SoundBuffer)
     typedef GAME_GET_SOUND_SAMPLES(game_get_sound_samples);
 

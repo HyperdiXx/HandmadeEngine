@@ -49,7 +49,8 @@ GameOutputSound(game_state* GameState, game_sound_output_buffer *SoundBuffer, in
 #endif
 }
 
-internal void RenderGradient(game_offscreen_buffer *Buffer, int XOffset, int YOffset)
+internal void 
+drawGradient(game_offscreen_buffer *Buffer, int XOffset, int YOffset)
 {
 	int Width = Buffer->Width;
 	int Height = Buffer->Height;
@@ -74,7 +75,7 @@ internal void RenderGradient(game_offscreen_buffer *Buffer, int XOffset, int YOf
 }
 
 internal void
-RenderPlayer(game_offscreen_buffer* Buffer, int PlayerX, int PlayerY, uint32 Color)
+drawPlayer(game_offscreen_buffer* Buffer, int PlayerX, int PlayerY, uint32 Color)
 {
     uint8 *EndofBuffer = (uint8 *)Buffer->BitmapMemory + 
         Buffer->Pitch *
@@ -140,7 +141,7 @@ FloorReal32toInt32(real32 Real)
 }
 
 internal void
-RenderRectangle(game_offscreen_buffer* Buffer, real32 MinXIn, real32 MinYIn, real32 MaxXIn, real32 MaxYIn,
+drawRectangle(game_offscreen_buffer* Buffer, real32 MinXIn, real32 MinYIn, real32 MaxXIn, real32 MaxYIn,
     real32 Red, real32 Green, real32 Blue)
 {
     int32 MinY = RoundValue(MinYIn);
@@ -223,10 +224,9 @@ IsTileMapPointEmpty(world *World, tile_map *TileMap, real32 TestX, real32 TestY)
 
         if ((PlayerTileX >= 0) && (PlayerTileX < World->CountX) && (PlayerTileY >= 0) && (PlayerTileY < World->CountY))
         {
-            uint32 TileMapValue = GetTileValue(World, TileMap, PlayerTileX, PlayerTileY);
-            Empty = (TileMapValue == 0);
+            //uint32 TileMapValue = GetTileValue(World, TileMap, PlayerTileX, PlayerTileY);
+           // Empty = (TileMapValue == 0);
         }
-
     }
 
     return (Empty);
@@ -278,9 +278,6 @@ IsWorldPointEmpty(world *World, world_location Testpos)
     return (Empty);
 }
 
-
-
-
 extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 {
     Assert((&Input->Controlls[0].Terminator - &Input->Controlls[0].Buttons[0]) ==
@@ -289,8 +286,6 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
 
 #define TILEMAPCOUNTX 16
 #define TILEMAPCOUNTY 9
-
-
 
     uint32 Map1[TILEMAPCOUNTY][TILEMAPCOUNTX] =
     {
@@ -345,7 +340,6 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     };
 
     tile_map TileMaps[2][2];
- 
    
     world World = {};
 
@@ -366,7 +360,6 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     real32 PlayerW = 0.2f * World.TileSideInPixels;
     real32 PlayerH = 0.3f * (real32)World.TileSideInPixels;
 
-
     World.TileMaps = (tile_map*)TileMaps;
 
     game_state *GameState = (game_state *)Memory->PermanentStorage;
@@ -374,16 +367,15 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     if (!Memory->IsInitialized)
     {
         GameState->playerPosition.TileMapX = 0;
-        GameState->playerPosition.TileMapY = 50;
+        GameState->playerPosition.TileMapY = 5;
         GameState->playerPosition.TileX = 0;
         GameState->playerPosition.TileY = 0;
-        GameState->playerPosition.X = 5.0f;
-        GameState->playerPosition.Y = 5.0f;
+        GameState->playerPosition.X = 120.0f;
+        GameState->playerPosition.Y = 105.0f;
 
         GameState->vel = 256.0f;
         Memory->IsInitialized = true;
     }
-
 
     tile_map *TileMap = GetTileMap(&World, GameState->playerPosition.TileMapX, GameState->playerPosition.TileMapY);
     Assert(TileMap);
@@ -462,9 +454,9 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
         }*/
     }
 
-    RenderRectangle(Buffer, 0.0f, 0.0f, (real32)Buffer->Width, (real32)Buffer->Height, 1.0f, 0.0f, 1.0f);
+    drawRectangle(Buffer, 0.0f, 0.0f, (real32)Buffer->Width, (real32)Buffer->Height, 1.0f, 1.0f, 1.0f);
 
-    for (int Row = 0;
+    /*for (int Row = 0;
         Row < 9;
         ++Row)
     {
@@ -475,17 +467,15 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
             uint32 ID = GetTileValue(&World, TileMap, Column, Row);
             real32 Gray = 0.5f;
             if (ID == 1)
-            {
                 Gray = 1.0f;
-            }
+
             real32 MinX = World.UpperLeftX + ((real32)Column) * World.TileSideInPixels;
             real32 MinY = World.UpperLeftY + ((real32)Row) * World.TileSideInPixels;
             real32 MaxX = MinX + World.TileSideInPixels;
             real32 MaxY = MinY + World.TileSideInPixels;
-            RenderRectangle(Buffer, MinX, MinY, MaxX, MaxY, Gray, Gray, Gray);
-
+            drawRectangle(Buffer, MinX, MinY, MaxX, MaxY, Gray, Gray, Gray);
         }
-    }
+    }*/
     
     //Color scheme
     real32 PlayerR = 1.0f;
@@ -495,11 +485,11 @@ extern "C" GAME_UPDATE_AND_RENDER(GameUpdateAndRender)
     real32 PlayerLeft = World.UpperLeftX + World.TileSideInPixels * GameState->playerPosition.TileX + GameState->playerPosition.X - 0.5f * PlayerW;
     real32 PlayerTop = World.UpperLeftY + World.TileSideInPixels * GameState->playerPosition.TileY + GameState->playerPosition.Y - PlayerH;
 
-    RenderRectangle(Buffer, PlayerLeft, PlayerTop, PlayerLeft + PlayerW, PlayerTop + PlayerH, PlayerR, PlayerG, PlayerB);
+    drawRectangle(Buffer, PlayerLeft, PlayerTop, PlayerLeft + PlayerW, PlayerTop + PlayerH, PlayerR, PlayerG, PlayerB);
 
     if (Input->Mouse[0].IsEnd)
     {
-        RenderPlayer(Buffer, 20, 20, 0xFFFF0000);
+        drawPlayer(Buffer, 20, 20, 0xFFFF00FF);
     }
 }
 

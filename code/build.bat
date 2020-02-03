@@ -7,12 +7,12 @@ IF NOT EXIST ..\..\build mkdir ..\..\build
 pushd ..\..\build
 
 REM 32-bit build
-REM cl %CommonCompilerFlags% ..\handmade\code\win32_startfile.cpp /link -subsystem: windows,5.1 %CommonLinkerFlags%
+REM cl %CommonCompilerFlags% ..\HandmadeEngine\code\win32_startfile.cpp /link -subsystem: windows,5.1 %CommonLinkerFlags%
 
 REM 64-bit build
 del *.pdb > NUL 2> NUL
-cl %CommonCompilerFlags% ..\handmade\code\handmade.cpp -Fmhandmade.map -LD /link -incremental:no -opt:ref -PDB:handmade_%RANDOM%.pdb /DLL -EXPORT:GameGetSoundSamples -EXPORT:GameUpdateAndRender
-cl %CommonCompilerFlags% ..\handmade\code\win32_startfile.cpp /link %CommonLinkerFlags%
+cl %CommonCompilerFlags% ..\HandmadeEngine\code\handmade.cpp -Fmhandmade.map -LD /link -incremental:no -opt:ref -PDB:handmade_%RANDOM%.pdb /DLL -EXPORT:GameGetSoundSamples -EXPORT:GameUpdateAndRender
+cl %CommonCompilerFlags% ..\HandmadeEngine\code\win32_startfile.cpp /link %CommonLinkerFlags%
 
 popd
 
